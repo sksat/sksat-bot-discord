@@ -43,7 +43,7 @@ impl EventHandler for Handler {
             builder.target("clang-head");
             builder.options_str(vec!["-Wall", "-Werror"]);
             builder.code(src);
-            let result = match builder.build(&wbox) {
+            let _result = match builder.build(&wbox) {
                 Ok(res) => res,
                 Err(e) => {
                     let _ = msg.channel_id.say(&ctx.http, &e);
@@ -55,7 +55,7 @@ impl EventHandler for Handler {
             println!("program: {}", result.program_all);
 
             let _ = msg.channel_id.say(&ctx.http, result.compiler_all).await;
-            let _ = msg.channel_id.say(&ctx.http, result.program_all).await;
+            let _ = msg.channel_id.say(&ctx.http, result.program_all.replace("@", "＠")).await;
         }
     }
 
