@@ -1,10 +1,20 @@
-use std::env;
+use std::fs;
+
+extern crate serde;
+extern crate toml;
+
+use serde::Deserialize;
 
 use serenity::{
     async_trait,
     model::{id::ChannelId, channel::Message, gateway::Ready},
     prelude::*,
 };
+
+#[derive(Deserialize)]
+struct Config {
+    token: String,
+}
 
 struct Handler;
 
@@ -22,18 +32,16 @@ impl EventHandler for Handler {
         println!("{} is connected!", ready.user.name);
         //let channel_id = Channel::from_str("bot-test").unwrap();
         let channel_id = ChannelId(773179565458980865);
-        if let Err(why) = channel_id.say(&ctx.http, "ready").await {
-            println!("Error sending ready: {:?}", why);
-        }
+        let _ = channel_id.say(&ctx.http, "ready").await;
     }
 }
 
 #[tokio::main]
 async fn main() {
-    let token = env::var("DISCORD_TOKEN")
-        .expect("Expected a token in the environment");
+    let config = fs::read_to_string("config.toml").unwrap();
+    let config: Config = toml::from_str(&config).unwrap();
 
-    let mut client = Client::builder(&token)
+    let mut client = Client::builder(&config.token)
         .event_handler(Handler)
         .await
         .expect("Err creating client");
