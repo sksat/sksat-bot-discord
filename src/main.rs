@@ -55,7 +55,7 @@ impl EventHandler for Handler {
             println!("program: {}", result.program_all);
 
             let _ = msg.channel_id.say(&ctx.http, result.compiler_all).await;
-            let _ = msg.channel_id.say(&ctx.http, result.program_all.replace("@", "＠")).await;
+            let _ = msg.channel_id.say(&ctx.http, result.program_all.replace("@", "＠").replace("!wandbox", "！wandbox")).await;
         }
     }
 
