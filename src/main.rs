@@ -1,7 +1,10 @@
+#![warn(clippy::pedantic)]
+
 use std::fs;
 
 extern crate serde;
 extern crate toml;
+extern crate wandbox;
 
 use serde::Deserialize;
 
@@ -10,6 +13,8 @@ use serenity::{
     model::{id::ChannelId, channel::Message, gateway::Ready},
     prelude::*,
 };
+
+use wandbox::{Wandbox, CompilationBuilder};
 
 #[derive(Deserialize)]
 struct Config {
@@ -25,6 +30,32 @@ impl EventHandler for Handler {
             if let Err(why) = msg.channel_id.say(&ctx.http, "Pong").await {
                 println!("Error sending message: {:?}", why);
             }
+        } else if msg.content.starts_with("!wandbox") {
+            let src = &msg.content[9..];
+
+            println!("src: {}", src);
+
+            let wbox = match Wandbox::new(None, None).await {
+                Ok(wbox) => wbox,
+                Err(e) => return println!("{}", e),
+            };
+            let mut builder = CompilationBuilder::new();
+            builder.target("clang-head");
+            builder.options_str(vec!["-Wall", "-Werror"]);
+            builder.code(src);
+            let result = match builder.build(&wbox) {
+                Ok(res) => res,
+                Err(e) => {
+                    let _ = msg.channel_id.say(&ctx.http, &e);
+                    return println!("{}", e);
+                },
+            };
+            let result = builder.dispatch().await.expect("Failed to lookup");
+            println!("compiler: {}", result.compiler_all);
+            println!("program: {}", result.program_all);
+
+            let _ = msg.channel_id.say(&ctx.http, result.compiler_all).await;
+            let _ = msg.channel_id.say(&ctx.http, result.program_all).await;
         }
     }
 
