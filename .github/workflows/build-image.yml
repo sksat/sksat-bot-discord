@@ -1,0 +1,18 @@
+name: build-image
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: build & push image
+      run: |
+        IMAGE_NAME=sksat-bot-discord:${GITHUB_REF#refs/heads/}
+        docker build . --tag docker.pkg.github.com/${GITHUB_REPOSITORY}/${IMAGE_NAME}
+        docker login docker.pkg.github.com --username sk2sat --password ${DOCKER_PASSWORD}
+        docker push docker.pkg.github.com/sk2sat/sksat-bot-discord/${IMAGE_NAME}
+      env:
+        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

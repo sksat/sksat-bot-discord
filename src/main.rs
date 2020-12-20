@@ -2,7 +2,7 @@
 
 use std::fs;
 
-extern crate serde;
+extern crate serenity;
 extern crate toml;
 extern crate wandbox;
 
@@ -10,11 +10,11 @@ use serde::Deserialize;
 
 use serenity::{
     async_trait,
-    model::{id::ChannelId, channel::Message, gateway::Ready},
+    model::{channel::Message, gateway::Ready, id::ChannelId},
     prelude::*,
 };
 
-use wandbox::{Wandbox, CompilationBuilder};
+use wandbox::{CompilationBuilder, Wandbox};
 
 #[derive(Deserialize)]
 struct Config {
@@ -25,7 +25,7 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn message(&self, ctx: Context, msg: Message){
+    async fn message(&self, ctx: Context, msg: Message) {
         if msg.content == "!ping" {
             if let Err(why) = msg.channel_id.say(&ctx.http, "Pong").await {
                 println!("Error sending message: {:?}", why);
@@ -48,14 +48,23 @@ impl EventHandler for Handler {
                 Err(e) => {
                     let _ = msg.channel_id.say(&ctx.http, &e);
                     return println!("{}", e);
-                },
+                }
             };
             let result = builder.dispatch().await.expect("Failed to lookup");
             println!("compiler: {}", result.compiler_all);
             println!("program: {}", result.program_all);
 
             let _ = msg.channel_id.say(&ctx.http, result.compiler_all).await;
-            let _ = msg.channel_id.say(&ctx.http, result.program_all.replace("@", "＠").replace("!wandbox", "！wandbox")).await;
+            let _ = msg
+                .channel_id
+                .say(
+                    &ctx.http,
+                    result
+                        .program_all
+                        .replace("@", "＠")
+                        .replace("!wandbox", "！wandbox"),
+                )
+                .await;
         }
     }
 
