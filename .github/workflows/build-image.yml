@@ -11,8 +11,8 @@ jobs:
     - name: build & push image
       run: |
         IMAGE_NAME=sksat-bot-discord:${GITHUB_REF#refs/heads/}
-        docker build . --tag docker.pkg.github.com/${GITHUB_REPOSITORY}/${IMAGE_NAME}
-        docker login docker.pkg.github.com --username sk2sat --password ${DOCKER_PASSWORD}
-        docker push docker.pkg.github.com/sk2sat/sksat-bot-discord/${IMAGE_NAME}
+        docker build . --tag ghcr.io/${GITHUB_REPOSITORY}/${IMAGE_NAME}
+        docker login ghcr.io -u sk2sat -p ${DOCKER_PASSWORD}
+        docker push ghcr.io/sk2sat/sksat-bot-discord/${IMAGE_NAME}
       env:
-        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        DOCKER_PASSWORD: ${{ secrets.GHCR_TOKEN }}
